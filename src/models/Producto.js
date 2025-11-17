@@ -34,7 +34,7 @@ const Producto = sequelize.define("Producto", {
   },
   categoria: {
     type: DataTypes.STRING(50),
-    allowNull: true, // opcional, por si quieres agrupar (ej. 'Juegos', 'Consolas', etc.)
+    allowNull: true, // opcional, por si se quiere tener un mejor control 
   },
 }, {
   tableName: "productos",

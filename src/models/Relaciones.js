@@ -19,14 +19,17 @@ const PedidoProducto = sequelize.define("PedidoProducto", {
 // Relaciones
 Pedido.belongsToMany(Producto, { 
   through: PedidoProducto,
+  as: "productos",
   foreignKey: "pedidoId",
   otherKey: "productoId",
 });
 
 Producto.belongsToMany(Pedido, { 
   through: PedidoProducto,
+  as: "pedidos",
   foreignKey: "productoId",
   otherKey: "pedidoId",
 });
+
 
 export { Usuario, Producto, Pedido, PedidoProducto };

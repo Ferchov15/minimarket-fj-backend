@@ -3,7 +3,7 @@ import { Pedido, Producto, PedidoProducto } from "../models/Relaciones.js";
 export const crearPedido = async (req, res) => {
   try {
     const { nombreCliente, productos } = req.body; 
-    // productos = [{ id: 1, cantidad: 2 }, { id: 3, cantidad: 1 }]
+
 
     const nuevoPedido = await Pedido.create({ nombreCliente });
 
@@ -32,7 +32,26 @@ export const obtenerPedidos = async (req, res) => {
       },
     });
 
-    res.json(pedidos);
+    // Calcular total por pedido
+    const pedidosConTotal = pedidos.map((pedido) => {
+      let total = 0;
+
+      pedido.productos.forEach((prod) => {
+        total += parseFloat(prod.precio) * prod.PedidoProducto.cantidad;
+      });
+
+      return {
+        id: pedido.id,
+        nombreCliente: pedido.nombreCliente,
+        estado: pedido.estado,
+        fecha: pedido.fecha,
+        total: total.toFixed(2),
+        productos: pedido.productos,
+      };
+    });
+
+    res.json(pedidosConTotal);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al obtener pedidos", error });

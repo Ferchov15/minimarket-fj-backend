@@ -5,6 +5,13 @@ import productoRoutes from "./routes/productoRoutes.js";
 import pedidoRoutes from "./routes/pedidoRoutes.js";
 
 const app = express();
+
+// Conexición con el Frontend
+const FRONTEND_URLS = [
+  "http://localhost:3000",      
+  "http://192.168.1.6:3000"
+];
+
 app.use(cors());
 app.use(express.json());
 
