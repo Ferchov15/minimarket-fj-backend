@@ -7,38 +7,50 @@ const Producto = sequelize.define("Producto", {
     autoIncrement: true,
     primaryKey: true,
   },
+
   nombre: {
     type: DataTypes.STRING(100),
     allowNull: false,
   },
+
   descripcion: {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+
   precio: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
+
   stock: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+
   descuento: {
     type: DataTypes.DECIMAL(5, 2),
-    defaultValue: 0, // porcentaje de descuento (ej. 10.00 = 10%)
+    defaultValue: 0,
   },
-  imagen: {
+
+  imagenUrl: {
     type: DataTypes.STRING,
-    allowNull: true, // puede ser null si aún no tiene imagen
-    defaultValue: "default.jpg", // imagen por defecto
+    allowNull: true,
   },
+
+  imagenPublicId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
   categoria: {
     type: DataTypes.STRING(50),
-    allowNull: true, // opcional, por si se quiere tener un mejor control 
+    allowNull: true,
   },
+
 }, {
   tableName: "productos",
-  timestamps: true, // recomendable activar timestamps para registrar cuándo se creó/actualizó
+  timestamps: true,
 });
 
 export default Producto;
