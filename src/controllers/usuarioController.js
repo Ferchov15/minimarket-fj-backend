@@ -37,10 +37,9 @@ export const registrarUsuario = async (req, res) => {
   }
 };
 
-
-/* =============================
-            LOGIN
-============================= */
+/* =====================================
+            LOGIN DEL USUARIO
+======================================== */
 export const loginUsuario = async (req, res) => {
   try {
     const { correo, contrasena } = req.body;
@@ -61,9 +60,15 @@ export const loginUsuario = async (req, res) => {
       { expiresIn: "2h" }
     );
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 2, 
+      secure: false, 
+    });
+
     res.json({
       mensaje: "Inicio de sesión exitoso",
-      token,
       usuario: {
         id: usuario.id,
         nombre: usuario.nombre,
@@ -73,10 +78,9 @@ export const loginUsuario = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ mensaje: "Error en el login", error });
+    res.status(500).json({ mensaje: "Error en el login" });
   }
 };
-
 
 /* =============================
          LISTAR USUARIOS
@@ -94,7 +98,6 @@ export const listarUsuarios = async (req, res) => {
     res.status(500).json({ mensaje: "Error al obtener usuarios", error });
   }
 };
-
 
 /* =============================
       OBTENER USUARIO POR ID
@@ -119,10 +122,9 @@ export const obtenerUsuario = async (req, res) => {
   }
 };
 
-
-/* =============================
-          ACTUALIZAR
-============================= */
+/* ==================================
+          ACTUALIZAR USUARIO
+===================================== */
 export const actualizarUsuario = async (req, res) => {
   try {
     const { id } = req.params;
@@ -150,10 +152,9 @@ export const actualizarUsuario = async (req, res) => {
   }
 };
 
-
-/* =============================
-             ELIMINAR
-============================= */
+/* ===============================
+          ELIMINAR USUARIO
+================================== */
 export const eliminarUsuario = async (req, res) => {
   try {
     const { id } = req.params;
@@ -171,4 +172,18 @@ export const eliminarUsuario = async (req, res) => {
     console.error(error);
     res.status(500).json({ mensaje: "Error al eliminar usuario", error });
   }
+};
+
+/* =============================
+            QUITAR SESION
+============================= */
+
+export const logoutUsuario = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false, 
+  });
+
+  res.json({ mensaje: "Sesión cerrada" });
 };

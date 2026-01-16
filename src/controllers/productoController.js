@@ -1,10 +1,18 @@
 import Producto from "../models/Producto.js";
 import { v2 as cloudinary } from "cloudinary";
 
-// 🟢 Crear un nuevo producto con imagen Cloudinary + cálculo descuento
+/* ======================================================
+                CREAR PRODUCTO
+====================================================== */
 export const crearProducto = async (req, res) => {
   try {
-    const { nombre, descripcion, precio, stock, descuento, categoria } = req.body;
+    const {
+      nombre,
+      descripcion,
+      precio,
+      stock,
+      categoria,
+    } = req.body;
 
     let imagenUrl = null;
     let imagenPublicId = null;
@@ -14,17 +22,10 @@ export const crearProducto = async (req, res) => {
       imagenPublicId = req.file.filename;
     }
 
-    // 🟡 Cálculo de precio final con descuento
-    const precioFinal = descuento
-      ? precio - (precio * descuento) / 100
-      : precio;
-
     const nuevoProducto = await Producto.create({
       nombre,
       descripcion,
       precio,
-      descuento,
-      precioFinal,   // <--- NUEVO
       stock,
       categoria,
       imagenUrl,
@@ -32,64 +33,70 @@ export const crearProducto = async (req, res) => {
     });
 
     res.status(201).json({
-      mensaje: "✅ Producto creado correctamente",
+      mensaje: "Producto creado correctamente",
       producto: nuevoProducto,
     });
-
   } catch (error) {
     console.error(error);
-    res.status(500).json({ mensaje: "❌ Error al crear el producto", error });
+    res.status(500).json({
+      mensaje: "Error al crear el producto",
+    });
   }
 };
 
-// 🔵 Obtener todos los productos
+/* ======================================================
+          OBTENER TODOS LOS PRODUCTOS
+====================================================== */
 export const obtenerProductos = async (req, res) => {
   try {
-    const productos = await Producto.findAll();
+    const productos = await Producto.findAll({
+      where: { estado: true },
+    });
+
     res.json(productos);
   } catch (error) {
-    res.status(500).json({ mensaje: "❌ Error al obtener los productos", error });
+    res.status(500).json({
+      mensaje: "Error al obtener productos",
+    });
   }
 };
 
-// 🔵 Obtener un producto por ID
+/* ======================================================
+             OBTENER PRODUCTO POR ID
+====================================================== */
 export const obtenerProductoPorId = async (req, res) => {
   try {
     const producto = await Producto.findByPk(req.params.id);
 
-    if (!producto) {
-      return res.status(404).json({ mensaje: "Producto no encontrado" });
+    if (!producto || !producto.estado) {
+      return res.status(404).json({
+        mensaje: "Producto no encontrado",
+      });
     }
 
     res.json(producto);
-
   } catch (error) {
-    res.status(500).json({ mensaje: "❌ Error al obtener el producto", error });
+    res.status(500).json({
+      mensaje: "Error al obtener el producto",
+    });
   }
 };
 
-// 🟡 Actualizar producto con cálculo descuento + imagen opcional
+/* ======================================================
+               ACTUALIZAR PRODUCTO
+====================================================== */
 export const actualizarProducto = async (req, res) => {
   try {
     const { id } = req.params;
     const datos = req.body;
 
     const producto = await Producto.findByPk(id);
-
     if (!producto) {
-      return res.status(404).json({ mensaje: "Producto no encontrado" });
+      return res.status(404).json({
+        mensaje: "Producto no encontrado",
+      });
     }
 
-    // 🟡 Calcular nuevo precioFinal si viene precio o descuento
-    if (datos.precio !== undefined || datos.descuento !== undefined) {
-      const nuevoPrecio = datos.precio !== undefined ? datos.precio : producto.precio;
-      const nuevoDescuento =
-        datos.descuento !== undefined ? datos.descuento : producto.descuento;
-
-      datos.precioFinal = nuevoPrecio - (nuevoPrecio * nuevoDescuento) / 100;
-    }
-
-    // 🖼️ Actualizar imagen si viene una nueva
     if (req.file) {
       if (producto.imagenPublicId) {
         await cloudinary.uploader.destroy(producto.imagenPublicId);
@@ -102,33 +109,39 @@ export const actualizarProducto = async (req, res) => {
     await producto.update(datos);
 
     res.json({
-      mensaje: "✅ Producto actualizado correctamente",
+      mensaje: "El producto se actualizo correctamente",
       producto,
     });
-
   } catch (error) {
-    res.status(500).json({ mensaje: "❌ Error al actualizar el producto", error });
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al actualizar producto, revisar el contenido",
+    });
   }
 };
 
-// 🔴 Eliminar producto
+/* ======================================================
+                  ELIMINAR PRODUCTO
+====================================================== */
 export const eliminarProducto = async (req, res) => {
   try {
     const producto = await Producto.findByPk(req.params.id);
 
     if (!producto) {
-      return res.status(404).json({ mensaje: "Producto no encontrado" });
+      return res.status(404).json({
+        mensaje: "Producto no encontrado",
+      });
     }
 
-    if (producto.imagenPublicId) {
-      await cloudinary.uploader.destroy(producto.imagenPublicId);
-    }
+    producto.estado = false;
+    await producto.save();
 
-    await producto.destroy();
-
-    res.json({ mensaje: "🗑️ Producto eliminado correctamente" });
-
+    res.json({
+      mensaje: "Producto Eliminado correctamente",
+    });
   } catch (error) {
-    res.status(500).json({ mensaje: "❌ Error al eliminar el producto", error });
+    res.status(500).json({
+      mensaje: "Error al eliminar producto",
+    });
   }
 };
