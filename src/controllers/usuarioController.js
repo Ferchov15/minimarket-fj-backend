@@ -67,13 +67,6 @@ export const loginUsuario = async (req, res) => {
       maxAge: 1000 * 60 * 60 * 2,
     });
 
-    res.cookie("admin_auth", "true", {
-      httpOnly: false,
-      sameSite: "none",
-      secure: true,
-      maxAge: 1000 * 60 * 60 * 2,
-    });
-
     res.json({
       mensaje: "Inicio de sesión exitoso",
       usuario: {
@@ -188,11 +181,6 @@ export const eliminarUsuario = async (req, res) => {
 export const logoutUsuario = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "none",
-    secure: true,
-  });
-
-  res.clearCookie("admin_auth", {
     sameSite: "none",
     secure: true,
   });
