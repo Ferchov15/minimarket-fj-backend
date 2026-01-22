@@ -13,20 +13,23 @@ const FRONTEND_URLS = [
 ];
 
 app.use(cors({
-  origin: function (origin, callback) {
+  origin: (origin, callback) => {
     if (!origin) return callback(null, true);
 
-    if (FRONTEND_URLS.includes(origin)) {
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "https://minimarket-jk.vercel.app"
+    ];
+
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
-    console.log("CORS bloqueado para:", origin);
-    return callback(new Error("No permitido por CORS"));
+    return callback(null, true); 
   },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 }));
+
 
 app.use((req, res, next) => {
   if (req.method === "OPTIONS") {
