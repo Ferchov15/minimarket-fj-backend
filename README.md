@@ -1278,6 +1278,8 @@ const verificarPedido = async (pedidoId) => {
 
 7. **Docker:** Asegúrate de tener Docker y Docker Compose instalados si quieres usar los contenedores.
 
+8. **IMPORTANTE:** La API se encuentra alojada en la plataforma Railway bajo su plan gratuito, por lo que su disponibilidad depende de las limitaciones del servicio; en caso de que la API no se encuentre operativa debido a la finalización del período gratuito, se puede optar por desplegar el proyecto en plataformas alternativas como Render u otros servicios similares, o contratar un plan de pago para continuar utilizando Railway.
+
 ---
 
 ## 🤝 Contribución
