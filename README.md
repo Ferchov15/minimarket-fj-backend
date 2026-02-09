@@ -1,9 +1,10 @@
-# 🛒 API Minimarket - Documentación
+# 🛒 API MINI MARKET F.J - Documentación
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![Status](https://img.shields.io/badge/status-active-success.svg)
 ![Railway](https://img.shields.io/badge/deploy-railway-blueviolet.svg)
 ![Database](https://img.shields.io/badge/database-supabase-green.svg)
+![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
 
 **Desarrollador:** Fernando Daniel Vaca Buitrón  
 **Contacto:** fdvaca@puce.edu.ec
@@ -14,17 +15,23 @@
 
 - [Introducción](#introducción)
 - [Tecnologías Utilizadas](#tecnologías-utilizadas)
+- [Instalación y Configuración](#instalación-y-configuración)
+  - [Instalación con Docker (Producción)](#instalación-con-docker-producción)
+  - [Instalación con Docker Compose (Desarrollo Local)](#instalación-con-docker-compose-desarrollo-local)
+  - [Instalación Manual](#instalación-manual)
 - [URL Base](#url-base)
+- [Estructura del Proyecto](#estructura-del-proyecto)
 - [Endpoints](#endpoints)
   - [Módulo Usuarios](#módulo-usuarios)
   - [Módulo Productos](#módulo-productos)
   - [Módulo Pedidos](#módulo-pedidos)
 - [Códigos de Respuesta](#códigos-de-respuesta)
 - [Estructura de Respuestas](#estructura-de-respuestas)
+- [Ejemplo de Flujo Completo](#ejemplo-de-flujo-completo)
 
 ---
 
-## 🚀 Introducción
+## Introducción de la API
 
 Esta API REST proporciona servicios para la gestión de un minimarket, permitiendo administrar usuarios, productos y pedidos de forma eficiente y segura. La API facilita operaciones CRUD completas para cada módulo, brindando una solución integral para el manejo de un negocio de retail.
 
@@ -34,25 +41,197 @@ Esta API REST proporciona servicios para la gestión de un minimarket, permitien
 - ✅ Sistema de pedidos con seguimiento de estado
 - ✅ Validación de datos robusta
 - ✅ Respuestas estructuradas en formato JSON
+- ✅ Dockerizado para fácil despliegue
+- ✅ Compatible con desarrollo local mediante Docker Compose
 
 ---
 
 ## 🛠 Tecnologías Utilizadas
 
 - **Backend:** Node.js + Express.js
-- **Base de Datos:** Supabase (PostgreSQL)
+- **Base de Datos:** Supabase (PostgreSQL) / PostgreSQL Local
 - **Hosting:** Railway
 - **Autenticación:** Sistema de login con credenciales
+- **Containerización:** Docker & Docker Compose
+- **ORM/Database Client:** PostgreSQL Client
 
 ---
 
 ## 🌐 URL Base
 
+**Producción (Railway):**
 ```
 https://minimarket-jk-backend-production.up.railway.app/api
 ```
 
-Todos los endpoints deben usar esta URL como base.
+**Desarrollo Local:**
+```
+http://localhost:4000/api
+```
+
+---
+
+## 📥 Instalación y Configuración
+
+### Instalación con Docker (Producción)
+
+Si deseas desplegar la aplicación en un servidor, utiliza el Dockerfile:
+
+```bash
+# Construir la imagen
+docker build -t minimarket-api .
+
+# Ejecutar el contenedor
+docker run -p 4000:4000 --env-file .env minimarket-api
+```
+
+**Dockerfile:**
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+EXPOSE 4000
+
+CMD ["npm", "run", "start"]
+```
+
+---
+
+### Instalación con Docker Compose (Desarrollo Local)
+
+Para trabajar en desarrollo local con base de datos PostgreSQL incluida:
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/tu-usuario/minimarket-jk-backend.git
+cd minimarket-jk-backend
+
+# Crear archivo .env (ver configuración abajo)
+cp .env.example .env
+
+# Iniciar los servicios
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Detener los servicios
+docker-compose down
+```
+
+**docker-compose.yml:**
+```yaml
+services:
+  api:
+    build: .
+    container_name: minimarket_api
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    restart: always
+
+  postgres:
+    image: postgres:15
+    container_name: minimarket_db
+    environment:
+      POSTGRES_USER: ferxav_backend
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: minimarket_jk
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres_data:
+```
+
+**Configuración del archivo .env:**
+```env
+# Servidor
+PORT=4000
+NODE_ENV=development
+
+# Base de datos (Docker Compose local)
+DB_HOST=postgres
+DB_PORT=5432
+DB_USER=tu_usuario_db
+DB_PASSWORD=tu_password_db
+DB_NAME=nombre_base_datos
+
+# Producción (ejemplo Supabase)
+# DB_HOST=tu-proyecto.supabase.co
+# DB_PORT=5432
+# DB_USER=postgres
+# DB_PASSWORD=tu_password
+# DB_NAME=postgres
+```
+---
+
+### Instalación Manual
+
+Si prefieres ejecutar la aplicación sin Docker:
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/tu-usuario/minimarket-jk-backend.git
+cd minimarket-jk-backend
+
+# Instalar dependencias
+npm install
+
+# Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus credenciales
+
+# Iniciar el servidor
+npm start
+
+# Para desarrollo con auto-reload
+npm run dev
+```
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+MINIMARKET-JK-BACKEND/
+├── node_modules/
+├── src/
+│   ├── config/
+│   │   ├── cloudinary.js
+│   │   ├── database.js
+│   │   └── multerCloud.js
+│   ├── controllers/
+│   │   ├── pedidoController.js
+│   │   ├── productoController.js
+│   │   └── usuarioController.js
+│   ├── middlewares/
+│   ├── models/
+│   │   ├── Pedido.js
+│   │   ├── Producto.js
+│   │   ├── Relaciones.js
+│   │   └── Usuario.js
+│   ├── routes/
+│   │   ├── pedidoRoutes.js
+│   │   ├── productoRoutes.js
+│   │   └── usuarioRoutes.js
+│   ├── app.js
+│   └── server.js
+├── .env
+├── .gitignore
+├── docker-compose.yml
+├── Dockerfile
+└── package.json
+```
 
 ---
 
@@ -87,6 +266,7 @@ Crea un nuevo usuario en el sistema.
 
 **Configuración en Postman:**
 - **Method:** POST
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/usuarios/registrar`
 - **Headers:** Content-Type: application/json
 - **Body:** raw → JSON
 
@@ -137,7 +317,6 @@ print(response.json())
 ```
 
 ![Captura de Postman - Registrar Usuario](./imagenes/postman_registrar_usuario.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando el registro de usuario*
 
 ---
 
@@ -166,6 +345,7 @@ Autentica a un usuario existente en el sistema.
 
 **Configuración en Postman:**
 - **Method:** POST
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/usuarios/login`
 - **Headers:** Content-Type: application/json
 - **Body:** raw → JSON
 
@@ -199,7 +379,6 @@ const iniciarSesion = async () => {
 ```
 
 ![Captura de Postman - Login Usuario](./imagenes/postman_login_usuario.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando el login de usuario*
 
 ---
 
@@ -214,6 +393,7 @@ Obtiene la lista de todos los usuarios registrados.
 
 **Configuración en Postman:**
 - **Method:** GET
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/usuarios/listar`
 - **Headers:** Content-Type: application/json
 
 **Ejemplo cURL:**
@@ -237,7 +417,6 @@ const listarUsuarios = async () => {
 ```
 
 ![Captura de Postman - Listar Usuarios](./imagenes/postman_listar_usuarios.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la lista de usuarios*
 
 ---
 
@@ -258,7 +437,7 @@ Obtiene la información de un usuario específico mediante su ID.
 
 **Configuración en Postman:**
 - **Method:** GET
-- **URL:** Reemplazar `{id}` con el ID del usuario
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/usuarios/{id}`
 - **Headers:** Content-Type: application/json
 
 **Ejemplo cURL:**
@@ -285,7 +464,6 @@ obtenerUsuarioPorId(1);
 ```
 
 ![Captura de Postman - Obtener Usuario por ID](./imagenes/postman_obtener_usuario.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la obtención de un usuario por ID*
 
 ---
 
@@ -320,7 +498,7 @@ Actualiza la información de un usuario existente.
 
 **Configuración en Postman:**
 - **Method:** PUT
-- **URL:** Reemplazar `{id}` con el ID del usuario
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/usuarios/{id}`
 - **Headers:** Content-Type: application/json
 - **Body:** raw → JSON
 
@@ -353,7 +531,6 @@ actualizarUsuario(1, { nombre: "Juan Perez Actualizado" });
 ```
 
 ![Captura de Postman - Actualizar Usuario](./imagenes/postman_actualizar_usuario.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la actualización de un usuario*
 
 ---
 
@@ -374,7 +551,7 @@ Elimina un usuario del sistema.
 
 **Configuración en Postman:**
 - **Method:** DELETE
-- **URL:** Reemplazar `{id}` con el ID del usuario
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/usuarios/{id}`
 - **Headers:** Content-Type: application/json
 
 **Ejemplo cURL:**
@@ -401,7 +578,6 @@ eliminarUsuario(1);
 ```
 
 ![Captura de Postman - Eliminar Usuario](./imagenes/postman_eliminar_usuario.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la eliminación de un usuario*
 
 ---
 
@@ -418,6 +594,7 @@ Lista todos los productos disponibles en el inventario.
 
 **Configuración en Postman:**
 - **Method:** GET
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/productos`
 - **Headers:** Content-Type: application/json
 
 **Ejemplo cURL:**
@@ -450,7 +627,6 @@ print(response.json())
 ```
 
 ![Captura de Postman - Obtener Productos](./imagenes/postman_obtener_productos.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la lista de productos*
 
 ---
 
@@ -487,6 +663,7 @@ Crea un nuevo producto en el inventario.
 
 **Configuración en Postman:**
 - **Method:** POST
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/productos`
 - **Headers:** Content-Type: application/json
 - **Body:** raw → JSON
 
@@ -528,7 +705,6 @@ const crearProducto = async () => {
 ```
 
 ![Captura de Postman - Crear Producto](./imagenes/postman_crear_producto.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la creación de un producto*
 
 ---
 
@@ -549,7 +725,7 @@ Obtiene la información de un producto específico.
 
 **Configuración en Postman:**
 - **Method:** GET
-- **URL:** Reemplazar `{id}` con el ID del producto
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/productos/{id}`
 - **Headers:** Content-Type: application/json
 
 **Ejemplo cURL:**
@@ -576,7 +752,6 @@ obtenerProductoPorId(1);
 ```
 
 ![Captura de Postman - Obtener Producto por ID](./imagenes/postman_obtener_producto_id.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la obtención de un producto por ID*
 
 ---
 
@@ -616,7 +791,7 @@ Actualiza la información de un producto existente.
 
 **Configuración en Postman:**
 - **Method:** PUT
-- **URL:** Reemplazar `{id}` con el ID del producto
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/productos/{id}`
 - **Headers:** Content-Type: application/json
 - **Body:** raw → JSON
 
@@ -655,7 +830,6 @@ actualizarProducto(1, {
 ```
 
 ![Captura de Postman - Actualizar Producto](./imagenes/postman_actualizar_producto.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la actualización de un producto*
 
 ---
 
@@ -676,7 +850,7 @@ Elimina un producto del inventario.
 
 **Configuración en Postman:**
 - **Method:** DELETE
-- **URL:** Reemplazar `{id}` con el ID del producto
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/productos/{id}`
 - **Headers:** Content-Type: application/json
 
 **Ejemplo cURL:**
@@ -703,7 +877,6 @@ eliminarProducto(1);
 ```
 
 ![Captura de Postman - Eliminar Producto](./imagenes/postman_eliminar_producto.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la eliminación de un producto*
 
 ---
 
@@ -741,6 +914,7 @@ Crea un nuevo pedido en el sistema.
 
 **Configuración en Postman:**
 - **Method:** POST
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/pedidos`
 - **Headers:** Content-Type: application/json
 - **Body:** raw → JSON
 
@@ -800,7 +974,6 @@ print(response.json())
 ```
 
 ![Captura de Postman - Crear Pedido](./imagenes/postman_crear_pedido.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la creación de un pedido*
 
 ---
 
@@ -815,6 +988,7 @@ Lista todos los pedidos registrados en el sistema.
 
 **Configuración en Postman:**
 - **Method:** GET
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/pedidos`
 - **Headers:** Content-Type: application/json
 
 **Ejemplo cURL:**
@@ -838,7 +1012,6 @@ const obtenerPedidos = async () => {
 ```
 
 ![Captura de Postman - Obtener Pedidos](./imagenes/postman_obtener_pedidos.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la lista de pedidos*
 
 ---
 
@@ -859,7 +1032,7 @@ Obtiene la información de un pedido específico.
 
 **Configuración en Postman:**
 - **Method:** GET
-- **URL:** Reemplazar `{id}` con el ID del pedido
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/pedidos/{id}`
 - **Headers:** Content-Type: application/json
 
 **Ejemplo cURL:**
@@ -886,7 +1059,6 @@ obtenerPedidoPorId(1);
 ```
 
 ![Captura de Postman - Obtener Pedido por ID](./imagenes/postman_obtener_pedido_id.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la obtención de un pedido por ID*
 
 ---
 
@@ -919,7 +1091,7 @@ Actualiza el estado de un pedido existente.
 
 **Configuración en Postman:**
 - **Method:** PUT
-- **URL:** Reemplazar `{id}` con el ID del pedido
+- **URL:** `https://minimarket-jk-backend-production.up.railway.app/api/pedidos/{id}`
 - **Headers:** Content-Type: application/json
 - **Body:** raw → JSON
 
@@ -964,7 +1136,6 @@ print(response.json())
 ```
 
 ![Captura de Postman - Actualizar Estado Pedido](./imagenes/postman_actualizar_pedido.png)
-> *Inserta aquí tu captura de pantalla de Postman mostrando la actualización del estado de un pedido*
 
 ---
 
@@ -1091,37 +1262,6 @@ const verificarPedido = async (pedidoId) => {
 
 ---
 
-## 📁 Estructura del Proyecto
-
-```
-minimarket-backend/
-├── controllers/
-│   ├── usuariosController.js
-│   ├── productosController.js
-│   └── pedidosController.js
-├── models/
-│   ├── Usuario.js
-│   ├── Producto.js
-│   └── Pedido.js
-├── routes/
-│   ├── usuarios.js
-│   ├── productos.js
-│   └── pedidos.js
-├── config/
-│   └── database.js
-└── server.js
-```
-
----
-
-## 🚀 Despliegue
-
-Este proyecto está desplegado en:
-- **Backend:** Railway (https://railway.app)
-- **Base de Datos:** Supabase (PostgreSQL)
-
----
-
 ## 📝 Notas Importantes
 
 1. **Autenticación:** Actualmente la API no implementa tokens JWT en todas las rutas. Se recomienda implementar autenticación completa para producción.
@@ -1133,6 +1273,10 @@ Este proyecto está desplegado en:
 4. **Manejo de Errores:** Implementa try-catch en tus llamadas para manejar errores adecuadamente.
 
 5. **Stock de Productos:** Al crear un pedido, verifica que haya suficiente stock disponible.
+
+6. **Variables de Entorno:** Nunca subas el archivo `.env` a tu repositorio. Usa `.env.example` como plantilla.
+
+7. **Docker:** Asegúrate de tener Docker y Docker Compose instalados si quieres usar los contenedores.
 
 ---
 
@@ -1163,33 +1307,6 @@ Este proyecto fue desarrollado con fines académicos.
 ---
 
 **Última actualización:** Febrero 2025
-
----
-
-## 📸 Galería de Capturas (Postman)
-
-Para agregar tus capturas de Postman:
-
-1. Crea una carpeta llamada `imagenes` en la raíz de tu repositorio
-2. Guarda tus capturas con los nombres especificados en la documentación
-3. Las imágenes se mostrarán automáticamente en el README
-
-**Nombres sugeridos para las capturas:**
-- `postman_registrar_usuario.png`
-- `postman_login_usuario.png`
-- `postman_listar_usuarios.png`
-- `postman_obtener_usuario.png`
-- `postman_actualizar_usuario.png`
-- `postman_eliminar_usuario.png`
-- `postman_obtener_productos.png`
-- `postman_crear_producto.png`
-- `postman_obtener_producto_id.png`
-- `postman_actualizar_producto.png`
-- `postman_eliminar_producto.png`
-- `postman_crear_pedido.png`
-- `postman_obtener_pedidos.png`
-- `postman_obtener_pedido_id.png`
-- `postman_actualizar_pedido.png`
 
 ---
 
