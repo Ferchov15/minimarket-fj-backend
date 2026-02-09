@@ -140,9 +140,9 @@ services:
     image: postgres:15
     container_name: minimarket_db
     environment:
-      POSTGRES_USER: ferxav_backend
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: minimarket_jk
+      POSTGRES_USER: tu_usuario
+      POSTGRES_PASSWORD: tu_password
+      POSTGRES_DB: minimarket_fj
     ports:
       - "5432:5432"
     volumes:
